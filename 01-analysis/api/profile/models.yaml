@@ -1,0 +1,33 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Profile Models
+  version: 1.0.0
+
+components:
+  schemas:
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - name
+        - phone
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: 'Елена'
+        phone:
+          type: string
+          example: '+79161234567'
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Новое имя клиента
+          example: 'Елена Петрова'

@@ -1,0 +1,109 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Auth
+  description: Авторизация и регистрация клиентов по SMS OTP.
+  version: 1.0.0
+
+servers:
+  - url: https://api.pottery.example/v1
+  - url: https://staging-api.pottery.example/v1
+
+tags:
+  - name: Auth
+    description: Авторизация клиента
+
+paths:
+  /auth/otp/send:
+    post:
+      tags:
+        - Auth
+      summary: Запрос SMS OTP
+      operationId: sendOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/OtpRequest'
+      responses:
+        '204':
+          description: OTP отправлен
+        '429':
+          description: Слишком часто — лимит повторной отправки
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+              example:
+                code: TOO_MANY_REQUESTS
+                message: 'Retry after 60 seconds'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+  /auth/otp/verify:
+    post:
+      tags:
+        - Auth
+      summary: Проверка OTP и вход/регистрация
+      operationId: verifyOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/OtpVerifyRequest'
+      responses:
+        '200':
+          description: Успешный вход — выдаются токены и профиль
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/AuthResponse'
+        '400':
+          $ref: '../common/models.yaml#/components/responses/BadRequest'
+        '401':
+          description: Неверный или истёкший OTP
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+              example:
+                code: INVALID_OTP
+                message: 'Invalid or expired OTP'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Обновление access-токена
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Новая пара токенов
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/TokenPair'
+        '401':
+          description: Невалидный или истёкший refresh-токен
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: './models.yaml#/components/securitySchemes/bearerAuth'

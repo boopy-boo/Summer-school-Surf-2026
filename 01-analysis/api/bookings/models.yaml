@@ -1,0 +1,91 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Bookings Models
+  version: 1.0.0
+
+components:
+  schemas:
+
+    BookingListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+        total:
+          type: integer
+
+    Booking:
+      type: object
+      required:
+        - id
+        - slot
+        - seats_count
+        - rental_count
+        - price_total
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        slot:
+          $ref: '../slots/models.yaml#/components/schemas/SlotListItem'
+        seats_count:
+          type: integer
+          description: Общее число мест в брони
+        rental_count:
+          type: integer
+          description: Число прокатных наборов в брони
+        price_total:
+          type: number
+          format: decimal
+          description: Итоговая стоимость (RUB)
+        status:
+          type: string
+          enum: [active, cancelled, late_cancel, workshop_cancelled]
+          description: >-
+            active — действительна; cancelled — отменена клиентом (ранняя);
+            late_cancel — поздняя отмена; workshop_cancelled — отменена мастерской
+        cancellation_reason:
+          type: string
+          description: Причина отмены (для workshop_cancelled)
+          example: 'Сломалась печь'
+        created_at:
+          type: string
+          format: date-time
+          description: Время создания брони (UTC)
+
+    BookingCreateRequest:
+      type: object
+      required:
+        - slot_id
+        - seats
+      properties:
+        slot_id:
+          type: string
+          format: uuid
+          description: ID слота
+        seats:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeatRequest'
+          minItems: 1
+          maxItems: 3
+          description: >-
+            Массив мест (1–3). Каждое место — выбор инструментов.
+
+    SeatRequest:
+      type: object
+      required:
+        - rental
+      properties:
+        rental:
+          type: boolean
+          description: >-
+            true — прокатные инструменты; false — свои инструменты

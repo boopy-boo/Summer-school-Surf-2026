@@ -1,0 +1,11 @@
+bin/
+.env
+.env.local
+vendor/
+coverage.out
+*.log
+tmp/
+.DS_Store
+.idea/
+.vscode/
+docs/

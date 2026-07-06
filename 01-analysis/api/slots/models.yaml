@@ -1,0 +1,194 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Slots Models
+  version: 1.0.0
+
+components:
+  schemas:
+
+    SlotListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlotListItem'
+        total:
+          type: integer
+          description: Общее число слотов по запросу (для пагинации)
+
+    SlotListItem:
+      type: object
+      required:
+        - id
+        - start_at
+        - program
+        - master
+        - total_seats
+        - free_seats
+        - price
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        start_at:
+          type: string
+          format: date-time
+          description: Время начала занятия (UTC)
+        program:
+          $ref: '#/components/schemas/ProgramBrief'
+        master:
+          $ref: '#/components/schemas/MasterBrief'
+        total_seats:
+          type: integer
+          description: Всего мест в слоте
+        free_seats:
+          type: integer
+          description: Свободных мест
+        price:
+          type: number
+          format: decimal
+          description: Цена одного места (RUB)
+        status:
+          type: string
+          enum: [active, filled, cancelled]
+          description: >-
+            active — запись открыта; filled — мест нет; cancelled — отменён мастерской
+
+    Slot:
+      type: object
+      required:
+        - id
+        - start_at
+        - program
+        - master
+        - total_seats
+        - free_seats
+        - free_rental_kits
+        - price
+        - rental_price
+        - price_total
+        - status
+        - workshop_address
+      properties:
+        id:
+          type: string
+          format: uuid
+        start_at:
+          type: string
+          format: date-time
+        program:
+          $ref: '#/components/schemas/Program'
+        master:
+          $ref: '#/components/schemas/MasterBrief'
+        total_seats:
+          type: integer
+        free_seats:
+          type: integer
+        free_rental_kits:
+          type: integer
+          description: Свободных прокатных наборов
+        price:
+          type: number
+          format: decimal
+          description: Цена места (RUB)
+        rental_price:
+          type: number
+          format: decimal
+          description: Цена проката одного набора (RUB)
+        price_total:
+          type: number
+          format: decimal
+          description: >-
+            Итоговая стоимость брони, рассчитанная сервером.
+            Формула: price × seats_count + rental_price × rental_count
+        status:
+          type: string
+          enum: [active, filled, cancelled]
+        workshop_address:
+          type: string
+          description: Адрес мастерской (текст)
+        workshop_coordinates:
+          type: object
+          required:
+            - lat
+            - lng
+          properties:
+            lat:
+              type: number
+              format: double
+            lng:
+              type: number
+              format: double
+
+    ProgramBrief:
+      type: object
+      required:
+        - id
+        - name
+        - type
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Название программы
+          example: 'Лепка для новичков'
+        type:
+          type: string
+          enum: [handbuilding, wheel]
+          description: Тип программы
+
+    Program:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - description
+        - duration_minutes
+        - capacity_cap
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: 'Лепка для новичков'
+        type:
+          type: string
+          enum: [handbuilding, wheel]
+        description:
+          type: string
+          description: Текстовое описание программы занятия
+          example: >-
+            Знакомство с гончарным делом: лепка из глины базовых форм под
+            руководством мастера. Всё необходимое предоставляется мастерской.
+        duration_minutes:
+          type: integer
+          description: Продолжительность занятия в минутах
+          example: 150
+        capacity_cap:
+          type: integer
+          description: Максимальное число участников по программе
+          example: 6
+
+    MasterBrief:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Имя мастера
+          example: 'Анна С.'

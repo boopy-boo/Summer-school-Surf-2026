@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - HTTP_ADDR=:8080
+      - BACKEND_URL=http://mock-backend:8081
+      - REDIS_ADDR=redis:6379
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-me}
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/pottery?sslmode=disable
+    depends_on:
+      - redis
+      - postgres
+      - mock-backend
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pottery
+    ports:
+      - "5432:5432"
+
+  mock-backend:
+    image: wiremock/wiremock:3
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./test/fixtures/wiremock:/home/wiremock
+
+volumes:
+  postgres_data:

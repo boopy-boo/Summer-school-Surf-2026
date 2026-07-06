@@ -1,0 +1,82 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Profile
+  description: Профиль текущего клиента.
+  version: 1.0.0
+
+servers:
+  - url: https://api.pottery.example/v1
+  - url: https://staging-api.pottery.example/v1
+
+tags:
+  - name: Profile
+    description: Профиль клиента
+
+security:
+  - bearerAuth: []
+
+paths:
+  /profile:
+    get:
+      tags:
+        - Profile
+      summary: Получение профиля
+      operationId: getProfile
+      responses:
+        '200':
+          description: Профиль клиента
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/UserProfile'
+        '401':
+          $ref: '../common/models.yaml#/components/responses/Unauthorized'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+    patch:
+      tags:
+        - Profile
+      summary: Обновление профиля
+      operationId: updateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: Обновлённый профиль
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/UserProfile'
+        '400':
+          $ref: '../common/models.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: '../common/models.yaml#/components/responses/Unauthorized'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+    delete:
+      tags:
+        - Profile
+      summary: Удаление аккаунта
+      operationId: deleteProfile
+      description: >-
+        Удаление аккаунта клиента (FR-48). Активные брони аннулируются;
+        прошедшие анонимизируются.
+      responses:
+        '204':
+          description: Аккаунт удалён
+        '401':
+          $ref: '../common/models.yaml#/components/responses/Unauthorized'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: '../auth/models.yaml#/components/securitySchemes/bearerAuth'

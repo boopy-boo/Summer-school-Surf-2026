@@ -1,0 +1,130 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Bookings
+  description: Управление бронями клиента (CRD — создание, чтение, отмена).
+  version: 1.0.0
+
+servers:
+  - url: https://api.pottery.example/v1
+  - url: https://staging-api.pottery.example/v1
+
+tags:
+  - name: Bookings
+    description: Бронирования клиента
+
+security:
+  - bearerAuth: []
+
+paths:
+  /bookings:
+    get:
+      tags:
+        - Bookings
+      summary: Список бронирований клиента
+      operationId: listBookings
+      description: >-
+        Возвращает историю бронирований текущего клиента с пагинацией (SCR-005).
+        Сортировка по `slot.start_at` убыванию (новые сверху). Разделение на
+        предстоящие/прошедшие — на клиенте.
+      parameters:
+        - $ref: '../common/models.yaml#/components/parameters/LimitParam'
+        - $ref: '../common/models.yaml#/components/parameters/OffsetParam'
+      responses:
+        '200':
+          description: Список броней
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/BookingListResponse'
+        '401':
+          $ref: '../common/models.yaml#/components/responses/Unauthorized'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+    post:
+      tags:
+        - Bookings
+      summary: Создание брони
+      operationId: createBooking
+      description: >-
+        Запись клиента на слот (SCR-004). Сервер атомарно проверяет доступность
+        мест и прокатных наборов; при отсутствии — возвращает 409. При
+        попытке записи на отменённый мастерской слот — 410.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/BookingCreateRequest'
+      responses:
+        '201':
+          description: Бронь создана
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Booking'
+        '400':
+          $ref: '../common/models.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: '../common/models.yaml#/components/responses/Unauthorized'
+        '409':
+          $ref: '../common/models.yaml#/components/responses/Conflict'
+        '410':
+          $ref: '../common/models.yaml#/components/responses/Gone'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+  /bookings/{bookingId}:
+    get:
+      tags:
+        - Bookings
+      summary: Детали брони
+      operationId: getBooking
+      parameters:
+        - $ref: '../common/models.yaml#/components/parameters/BookingIdParam'
+      responses:
+        '200':
+          description: Данные брони
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Booking'
+        '401':
+          $ref: '../common/models.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: '../common/models.yaml#/components/responses/NotFound'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+    delete:
+      tags:
+        - Bookings
+      summary: Отмена брони
+      operationId: cancelBooking
+      description: >-
+        Отмена брони клиентом (SCR-006). Сервер определяет тип отмены
+        (ранняя/поздняя) по времени. Раняя — освобождает места; поздняя —
+        фиксирует `late_cancel` без освобождения.
+      parameters:
+        - $ref: '../common/models.yaml#/components/parameters/BookingIdParam'
+      responses:
+        '200':
+          description: Бронь отменена
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Booking'
+        '400':
+          $ref: '../common/models.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: '../common/models.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: '../common/models.yaml#/components/responses/NotFound'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: '../auth/models.yaml#/components/securitySchemes/bearerAuth'

@@ -1,0 +1,18 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Masters Models
+  version: 1.0.0
+
+components:
+  schemas:
+
+    MasterListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '../slots/models.yaml#/components/schemas/MasterBrief'

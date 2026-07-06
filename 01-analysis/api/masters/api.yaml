@@ -1,0 +1,43 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Masters
+  description: Справочник мастеров (read-only).
+  version: 1.0.0
+
+servers:
+  - url: https://api.pottery.example/v1
+  - url: https://staging-api.pottery.example/v1
+
+tags:
+  - name: Masters
+    description: Мастера, read-only
+
+security:
+  - bearerAuth: []
+
+paths:
+  /masters:
+    get:
+      tags:
+        - Masters
+      summary: Список мастеров
+      operationId: listMasters
+      description: >-
+        Справочник мастеров для фильтра слотов. Сортировка по имени.
+      responses:
+        '200':
+          description: Список мастеров
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/MasterListResponse'
+        '401':
+          $ref: '../common/models.yaml#/components/responses/Unauthorized'
+        default:
+          $ref: '../common/models.yaml#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: '../auth/models.yaml#/components/securitySchemes/bearerAuth'

@@ -1,0 +1,84 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Auth Models
+  version: 1.0.0
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: access_token в заголовке Authorization
+
+  schemas:
+
+    OtpRequest:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          description: Номер телефона в формате E.164 (+7...)
+          example: '+79161234567'
+
+    OtpVerifyRequest:
+      type: object
+      required:
+        - phone
+        - code
+        - name
+      properties:
+        phone:
+          type: string
+          example: '+79161234567'
+        code:
+          type: string
+          description: 6-значный OTP-код
+          example: '123456'
+        name:
+          type: string
+          description: Имя клиента (при регистрации)
+          example: 'Елена'
+
+    RefreshRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: Refresh-токен
+          example: 'eyJhbGciOiJIUzI1NiIs...'
+
+    AuthResponse:
+      type: object
+      required:
+        - tokens
+        - user
+      properties:
+        tokens:
+          $ref: '#/components/schemas/TokenPair'
+        user:
+          $ref: '../profile/models.yaml#/components/schemas/UserProfile'
+
+    TokenPair:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - expires_in
+      properties:
+        access_token:
+          type: string
+          description: JWT access-токен, срок 24 ч
+        refresh_token:
+          type: string
+          description: JWT refresh-токен, срок 30 дней
+        expires_in:
+          type: integer
+          description: Срок жизни access-токена в секундах
+          example: 86400

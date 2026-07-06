@@ -1,0 +1,177 @@
+openapi: 3.0.3
+
+info:
+  title: Гончарная мастерская API — Common Models
+  version: 1.0.0
+
+components:
+
+  parameters:
+
+    DateFromParam:
+      name: date_from
+      in: query
+      description: Начало периода (включительно). ISO 8601 date-time в UTC.
+      schema:
+        type: string
+        format: date-time
+      example: '2026-09-01T00:00:00Z'
+
+    DateToParam:
+      name: date_to
+      in: query
+      description: Конец периода (включительно). ISO 8601 date-time в UTC.
+      schema:
+        type: string
+        format: date-time
+      example: '2026-09-07T23:59:59Z'
+
+    ProgramTypeParam:
+      name: program_type
+      in: query
+      description: Тип программы (фильтр). Массив значений через запятую.
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [handbuilding, wheel]
+      example: [handbuilding, wheel]
+
+    MasterIdParam:
+      name: master_id
+      in: query
+      description: ID мастера (фильтр). Массив значений через запятую.
+      schema:
+        type: array
+        items:
+          type: string
+          format: uuid
+      example: ['a1b2c3d4-e5f6-7890-abcd-ef1234567890']
+
+    OnlyAvailableParam:
+      name: only_available
+      in: query
+      description: Показать только слоты со свободными местами.
+      schema:
+        type: boolean
+        default: false
+      example: false
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Лимит записей на страницу.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      example: 20
+
+    OffsetParam:
+      name: offset
+      in: query
+      description: Смещение для пагинации.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      example: 0
+
+    SlotIdParam:
+      name: slotId
+      in: path
+      required: true
+      description: ID слота (UUID).
+      schema:
+        type: string
+        format: uuid
+
+    BookingIdParam:
+      name: bookingId
+      in: path
+      required: true
+      description: ID брони (UUID).
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Код ошибки
+        message:
+          type: string
+          description: Человекочитаемое описание ошибки
+        details:
+          type: string
+          description: Дополнительные детали (опционально)
+
+  responses:
+
+    BadRequest:
+      description: Невалидные параметры запроса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: BAD_REQUEST
+            message: 'Invalid date range'
+
+    Unauthorized:
+      description: Не авторизован — токен отсутствует или невалиден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: UNAUTHORIZED
+            message: 'Authentication required'
+
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: NOT_FOUND
+            message: 'Slot not found'
+
+    Gone:
+      description: Слот отменён мастерской — повторная запись запрещена
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: GONE
+            message: 'Slot cancelled by workshop'
+
+    Conflict:
+      description: Конфликт — мест уже нет или прокатный фонд исчерпан
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: CONFLICT
+            message: 'No seats available'
+
+    InternalError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: INTERNAL_ERROR
+            message: 'Internal server error'

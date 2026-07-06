@@ -1,0 +1,13 @@
+{
+  "name": "pottery-workshop-api",
+  "version": "1.0.0",
+  "description": "OpenAPI спецификация клиентского API гончарной мастерской «Глина»",
+  "scripts": {
+    "lint": "redocly lint openapi.yaml",
+    "bundle": "redocly bundle openapi.yaml -o dist/openapi.yaml",
+    "preview": "redocly preview-docs openapi.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.0.0"
+  }
+}
